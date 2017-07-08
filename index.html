@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+  <title>Gif Application</title>
+  
+  <style type="text/css">
+    button {
+    	margin: 10px;
+    	color: white;
+    	background-color: green;
+    }
+	  
+    input {
+		margin: 10px;
+    }
+
+    form {
+    	position: relative;
+    	left: 50%;
+    }
+
+    .container2 {
+    	position: relative;
+    	width: 50%;
+    	height: 50%;
+    	overflow: auto;
+    }
+
+    #Gif-place {
+    	width: 400px;
+    	height: 400px;
+    }
+
+  </style>
+  
+</head>
+<body>
+
+<div class="container">
+
+    <div id="buttons-view"></div>
+
+    <form id="gif-form">
+      <label for="gif-input">Submit</label>
+      <input type="text" id="gif-input"><br>
+      <input id="add-gif" type="submit" value="Submit-Gif">
+    </form>
+
+<div class="container2">
+    <div id="Gif-place"></div>
+</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  </div>
+</body>
+
+    <script type="text/javascript">
+
+      var gifs = ["michael jordan", "lebron james", "willem dafoe", "bill burr"];
+
+      function displayGif() {
+
+        var gif = $(this).attr("data-name");
+        var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + gif + "&api_key=b462a2fb94f14e5ab5b167ebfcd912a3&limit=10";
+
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).done(function(response) {
+        	console.log(response);
+
+          var results = response.data;
+
+          for (var i = 0; i < results.length; i++) {
+
+          if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
+
+          var gifDiv = $("<div class='gif' data-state='animate'>");
+
+          var rating = results[i].rating;
+
+          var p = $("<p>").text("Rating: " + rating);
+
+          gifDiv.append(p);
+
+         var gifImage = $("<img>");
+
+         var state = $(".gif").attr("data-state");
+
+         if (state === "animate"){
+        
+        	gifImage.attr("src", results[i].images.fixed_height.webp);
+     
+     		}else {
+
+     		gifImage.attr("src", results[i].images.downsized_still.url);
+    		}
+
+          gifDiv.append(gifImage);
+
+          $("#Gif-place").prepend(gifDiv);
+            }
+          }
+        });
+    };
+
+      function renderButtons() {
+
+        $("#buttons-view").empty();
+
+        for (var i = 0; i < gifs.length; i++) {
+          var a = $("<button>");
+          a.addClass("gifs");
+          a.attr("data-name", gifs[i]);
+          a.text(gifs[i]);
+          $("#buttons-view").append(a);
+        }
+      }
+
+      $("#add-gif").on("click", function(event) {
+        event.preventDefault();
+        var gif = $("#gif-input").val().trim();
+        gifs.push(gif);
+        renderButtons();
+      });
+
+      $(".gif").on("click", function() {
+      var state = $(this).attr("data-state");
+      if (state === "animate") {
+    	$(this).attr("data-state", "whatever");
+      } else {
+        $(this).attr("data-state", "animate");
+      }
+    });
+
+      $(document).on("click", ".gifs", displayGif);
+
+      renderButtons();
+    </script>
+
+</html>
